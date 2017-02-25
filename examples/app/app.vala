@@ -382,4 +382,15 @@ app.get ("/auth", authenticate (new BasicAuthentication (""), (a) => {
 
 app.get ("/middleware", accept ("text/plain", forward_with<string> (new FooMiddleware ().fire)));
 
+#if SOUP_2_50
+app.get ("/websocket", websocket ({}, (req, res, next, ctx, ws) => {
+	ws.send_text ("test");
+	ws.message.connect ((type, msg) => {
+		ws.send_binary (msg.get_data ());
+		assert (res.status == 200);
+	});
+	return true;
+}));
+#endif
+
 Server.@new ("http", handler: app).run ();
